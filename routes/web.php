@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\PredictController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -22,7 +23,29 @@ Route::middleware([
     config('jetstream.auth_session'),
     'verified'
 ])->group(function () {
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
+    Route::get('/dashboard', [PredictController::class, 'dashboard'])
+        ->name('dashboard');
+
+    // view page of data actual
+    Route::get('/view/actual', function () {
+        return view('view-actual');
+    })->name('view.data.actual');
+    // CRUD
+    Route::post('/view/actual', [PredictController::class, 'crudDataActual']);
+    // View Data as Json for datatable
+    Route::get('/data/actual/', [PredictController::class, 'viewDataActual'])
+        ->name('data.actual');
+
+    // view page of data predict
+    Route::get('/view/predict', function () {
+        return view('view-predict');
+    })->name('view.data.predict');
+    // making prediction
+    // only use these with ajax
+    Route::post('/view/predict', [PredictController::class, 'makePredict'])
+    ->name('make.predict');
+    // View Data as Json for datatable
+    Route::get('/data/predict/', [PredictController::class, 'viewDataPredict'])
+        ->name('data.predict');
+
 });

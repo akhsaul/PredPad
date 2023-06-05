@@ -13,6 +13,8 @@
 
     <!-- Styles -->
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/bootstrap.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/pro.css') }}">
     <!--<link rel="stylesheet" href="https://kit-pro.fontawesome.com/releases/v6.4.0/css/pro.css">-->
     @livewireStyles
 
@@ -44,8 +46,11 @@
     </div>
 
     @stack('modals')
-
+    <script type="text/javascript" src="{{ asset('js/bootstrap.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('js/jquery-3.7.0.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('js/chart-4.3.0.umd.js') }}"></script>
     @livewireScripts
+    @stack('extra-script')
 </body>
 
 </html>
