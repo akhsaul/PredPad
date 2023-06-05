@@ -16,7 +16,7 @@ class CreatePredictsTable extends Migration
         Schema::create('predicts', function (Blueprint $table) {
             $table->id();
             $table->date('tahun');
-            $table->float('produksi_actual');
+            $table->float('produksi_actual')->nullable();
             $table->float('produksi_predict')->nullable();
             $table->timestamps();
         });

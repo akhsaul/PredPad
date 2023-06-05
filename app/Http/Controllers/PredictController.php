@@ -43,22 +43,49 @@ class PredictController extends Controller
                 $arrayProduksiKecamatan[$index] += $modelActual[$n]->produksi;
             }
 
-            $tahun = $modelActual[$n]->tahun->year;
+            $tahun = $modelActual[$n]->tahun->year ?? null;
+
             if (!in_array($tahun, $arrayDate)) {
-                $arrayDate[$n] = $tahun;
-                $arrayActual[$n] = $modelActual[$n]->produksi;
+                $arrayDate[] = $tahun;
+                $arrayActual[] = $modelActual[$n]->produksi;
                 // '?? 0' will return 0 if index out of range or value is null
-                $arrayPredict[$n] = $modelPredict[$n]->produksi_predict ?? 0;
+                //$arrayPredict[] = $modelPredict[$n]->produksi_predict ?? 0;
             } else {
                 $index = array_search($tahun, $arrayDate);
                 $arrayActual[$index] += $modelActual[$n]->produksi;
-                $arrayPredict[$index] += $modelPredict[$n]->produksi_predict ?? 0;
             }
         }
+
+        for ($n = 0; $n < count($modelPredict); $n++) {
+            $tahun = $modelPredict[$n]->tahun->year ?? null;
+
+            if (!in_array($tahun, $arrayDate)) {
+                $arrayDate[] = $tahun;
+                //$index = array_search($tahun, $arrayDate);
+                $arrayPredict[] = $modelPredict[$n]->produksi_predict ?? 0;
+                // safety get, will return null rather Exception
+                $actual = $arrayActual[$n] ?? null;
+                if ($actual == null){
+                    $arrayActual[] = 0;
+                }
+            } else {
+                $arrayPredict[] = $modelPredict[$n]->produksi_predict ?? 0;
+                //dd($n, $tahun, $arrayDate, $arrayActual, $arrayPredict);
+            }
+
+        }
+
         // total data aktual, user
         $arrayTotalData = [count($modelActual), count($modelUser)];
 
-
+        $sizeActual = count($arrayActual);
+        $sizePredict = count($arrayPredict);
+        // if user add new data actual but not doing predict yet
+        // then the arrayActual and arrayPredict will have different length
+        if($sizeActual != $sizePredict){
+            // Pad the array with zero
+            $arrayPredict = array_pad($arrayPredict, max($sizeActual, $sizePredict), 0);
+        }
 
         return view('dashboard', [
             'array_kecamatan' => $arrayKecamatan,
@@ -95,8 +122,8 @@ class PredictController extends Controller
         $validator = Validator::make($request->all(), [
             'tahun' => 'required|date_format:Y',
             'kecamatan' => 'required|string|max:255',
-            'luas_lahan' => 'required|numeric|min:1',
-            'produksi' => 'required|numeric|min:1',
+            'luas_lahan' => 'required|numeric|min:0.01',
+            'produksi' => 'required|numeric|min:0.01',
         ]);
 
         if ($validator->fails()) {
@@ -107,6 +134,13 @@ class PredictController extends Controller
 
         $model = new Actual;
         $model->fill($validator->safe()->all());
+
+        // Not a carbon instance
+        $tahun = $validator->safe()->only('tahun')['tahun'];
+        $carbon = Carbon::createFromFormat('Y', $tahun);
+        // delete predict by year
+        $this->deletePredictByYear($carbon);
+
         $result = $model->save();
 
         if ($result) {
@@ -122,8 +156,8 @@ class PredictController extends Controller
             'id' => 'required|integer|exists:App\Models\Actual,id',
             'tahun' => 'required|date_format:Y',
             'kecamatan' => 'required|string|max:255',
-            'luas_lahan' => 'required|numeric|min:1',
-            'produksi' => 'required|numeric|min:1',
+            'luas_lahan' => 'required|numeric|min:0.01',
+            'produksi' => 'required|numeric|min:0.01',
         ]);
 
         if ($validator->fails()) {
@@ -133,6 +167,12 @@ class PredictController extends Controller
         }
 
         $model = Actual::find($request->id);
+
+        // Carbon instance
+        $tahun = $model->tahun;
+        // delete predict by year
+        $this->deletePredictByYear($tahun);
+
         $model->fill($validator->safe()->all());
         $result = $model->save();
 
@@ -155,13 +195,27 @@ class PredictController extends Controller
                 ->withInput();
         }
 
-        $result = Actual::find($request->id)->delete();
+        $model = Actual::find($request->id);
+
+        // Carbon instance
+        $tahun = $model->tahun;
+        // delete predict by year
+        $this->deletePredictByYear($tahun);
+
+        $result = $model->delete();
 
         if ($result) {
             return back();
         } else {
             return $this->responseJson(null, 'Failed to delete data', 500);
         }
+    }
+
+    private function deletePredictByYear($carbonInstance)
+    {
+        $predict = DB::table('predicts')
+            ->whereRaw('year(tahun) >= ?', [$carbonInstance->year])
+            ->delete();
     }
 
     function viewDataPredict()
@@ -175,7 +229,7 @@ class PredictController extends Controller
 
         $data = [];
 
-        $max = count($dataActual) > count($dataPredict) ? count($dataActual) : count($dataPredict);
+        $max = max(count($dataActual), count($dataPredict));
 
         // check if actual and predict has same year and same produksi
         for ($n = 0; $n < $max; $n++) {

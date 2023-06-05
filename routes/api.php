@@ -14,19 +14,8 @@ use App\Http\Controllers\PredictController;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
-/*
+
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
-*/
 
-/*
-Route::middleware([
-    'auth:sanctum',
-    config('jetstream.auth_session'),
-    'verified'
-])->group(function () {
-    Route::get('/data/actual/', [PredictController::class, 'viewDataActual'])
-        ->name('data.actual');
-});
-*/

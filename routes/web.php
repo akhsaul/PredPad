@@ -14,8 +14,11 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
+/*Route::get('/', function () {
     return view('welcome');
+});*/
+Route::get('/', function () {
+    return redirect()->route('login');
 });
 
 Route::middleware([
@@ -43,7 +46,7 @@ Route::middleware([
     // making prediction
     // only use these with ajax
     Route::post('/view/predict', [PredictController::class, 'makePredict'])
-    ->name('make.predict');
+        ->name('make.predict');
     // View Data as Json for datatable
     Route::get('/data/predict/', [PredictController::class, 'viewDataPredict'])
         ->name('data.predict');

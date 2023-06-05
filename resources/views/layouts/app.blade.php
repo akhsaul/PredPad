@@ -6,14 +6,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ config('app.name', 'Laravel') }}</title>
+    <title>Prediksi Panen Padi</title>
 
     <!-- Fonts -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap">
 
     <!-- Styles -->
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/bootstrap.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ asset('css/pro.css') }}">
     <!--<link rel="stylesheet" href="https://kit-pro.fontawesome.com/releases/v6.4.0/css/pro.css">-->
     @livewireStyles
@@ -46,9 +46,9 @@
     </div>
 
     @stack('modals')
-    <script type="text/javascript" src="{{ asset('js/bootstrap.js') }}"></script>
-    <script type="text/javascript" src="{{ asset('js/jquery-3.7.0.js') }}"></script>
-    <script type="text/javascript" src="{{ asset('js/chart-4.3.0.umd.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('js/jquery-3.7.0.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('js/chart-4.3.0.umd.min.js') }}"></script>
     @livewireScripts
     @stack('extra-script')
 </body>
